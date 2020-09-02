@@ -6,6 +6,7 @@ import pandas as pd
 from .models import Arret
 from django.db.models import Q
 from django.views.generic import ListView
+import mimetypes
 
 # Create your views here.
 
@@ -69,3 +70,28 @@ def select_arret(request,slug):
         article.selected = not article.selected
         article.save()
     return HttpResponse(status=204)
+
+
+
+
+
+def download_file(request):
+    qs = Arret.objects.filter(selected=True)
+    output_path = "output.csv"
+    if(qs.exists()):
+
+        D = {
+            "Arret":[arret.contenu for arret in qs],
+            "Date": [arret.date for arret in qs],
+            "Juridiction": [arret.juridiction for arret in qs],
+            "page": [arret.page for arret in qs],
+        }
+        df = pd.DataFrame(D)
+        df.to_csv(output_path)
+        fl = open(output_path, "r")
+        mime_type, _ = mimetypes.guess_type(output_path)
+        response = HttpResponse(fl, content_type=mime_type)
+        response['Content-Disposition'] = "attachment; filename=%s" % output_path
+        os.remove(output_path)
+        return response
+    return HttpResponse(status=404)
