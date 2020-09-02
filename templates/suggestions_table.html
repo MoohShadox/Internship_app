@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 {% extends "base.html" %}
 {% load static %}
+
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+
+
+
 <html lang="en">
 {% block content %}
     <body>
@@ -8,10 +15,9 @@
       <thead>
         <tr>
             <th scope="col">Page</th>
-            <th scope="col">Contenu de l'arrêt</th>
-            <th scope="col">Date</th>
             <th scope="col">Juridiction</th>
-
+            <th scope="col">Date</th>
+            <th scope="col">Contenu de l'arrêt</th>
         </tr>
       </thead>
       <tbody>
@@ -21,23 +27,21 @@
             <td>{{ arret_obj.juridiction }}</td>
             <td>{{ arret_obj.date }}</td>
             <td>{{ arret_obj.highlights }}</td>
-            <td>
-            <a href="{% url 'core:select' arret_obj.annee arret_obj.identifiant  %}">
-                {% if not arret_obj.selected %}
-                    <button class="btn btn-primary waves-effect">
-                        Select
-                    </button>
-                {% else %}
-                    <button class="btn btn-danger waves-effect">
-                        Selected
-                    </button>
-                {% endif %}
-            </a>
+        <td>
+            <div class="checkbox-container">
+                <form action="{% url 'core:select' arret_obj.identifiant  %}" method="get" class="form-example" >
+                    <label class="checkbox-label">
+                        <input onChange="this.form.submit()" type="checkbox" {% if arret_obj.selected %} checked {% endif %}>
+                        <span class="checkbox-custom rectangular"></span>
+                    </label>
+                </form>
+            </div>
 
-            </td>
+        </td>
+
             <td>
                 <a  target="_blank" href={{ arret_obj.image }}>
-                    <button class="btn btn-warning waves-effect">
+                    <button class="btn btn-primary waves-effect">
                         View
                     </button>
                 </a>
@@ -73,10 +77,6 @@
       </ul>
 
     </nav>
-
-
-
-
     </body>
 {% endblock %}
 
@@ -92,6 +92,7 @@
   <script type="text/javascript">
     new WOW().init();
   </script>
+
 
 
 </html>

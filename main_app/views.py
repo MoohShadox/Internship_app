@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.conf import settings
 import os
@@ -61,10 +62,10 @@ class suggestions_view(ListView):
         return qs
 
 
-def select_arret(request,annee,slug):
+def select_arret(request,slug):
     article_qs = Arret.objects.filter(identifiant=slug)
     if(article_qs.exists()):
         article = article_qs[0]
         article.selected = not article.selected
         article.save()
-    return redirect("core:suggestions",slug=annee)
+    return HttpResponse(status=204)
