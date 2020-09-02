@@ -4,7 +4,7 @@ urlpatterns = [
     path("",base,name="base"),
     path("load_from_cache/<slug>",load_in_db,name="load-from-cache"),
     path("suggestions/<slug>", suggestions_view.as_view(), name="suggestions"),
-    path("select/<annee>/<slug>", select_arret, name="select"),
+    path("select/<slug>", select_arret, name="select"),
 
     path("clear_db",clear,name="clear")
 ]

@@ -13,10 +13,10 @@ class Arret(models.Model):
     juridiction = models.CharField(max_length=200)
     page = models.IntegerField()
     contenu = models.TextField()
-    selected = models.BooleanField(default=False)
     image = models.URLField()
     annee = models.IntegerField()
     num_receuil = models.IntegerField()
+    selected = models.BooleanField(default=False)
 
     #TODO
     def highlights(self):
