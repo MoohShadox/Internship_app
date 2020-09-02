@@ -2,9 +2,10 @@ from django.shortcuts import render, redirect
 from django.conf import settings
 import os
 import pandas as pd
-from .models import Arret
+from .models import Arret, Pattern
 from django.db.models import Q
 from django.views.generic import ListView
+from .formulaire_home import form_patterns
 
 # Create your views here.
 
@@ -54,11 +55,16 @@ def load_in_db(request,slug):
 
 class suggestions_view(ListView):
     template_name = "suggestions_table.html"
-    paginate_by = 50
+    paginate_by = 10
 
     def get_queryset(self):
-        qs = Arret.objects.filter(annee=self.kwargs["slug"])
-        return qs
+        patterns = Pattern.objects.filter(selected = True)
+        result = Arret.objects.none()
+        for p in patterns:
+            result = result | Arret.objects.filter(contenu__regex = p.pattern, annee = self.kwargs["slug"])
+
+        
+        return result
 
 
 def select_arret(request,annee,slug):
@@ -68,3 +74,42 @@ def select_arret(request,annee,slug):
         article.selected = not article.selected
         article.save()
     return redirect("core:suggestions",slug=annee)
+def load_patterns(request):
+    for name, pattern in zip(["évidence", "abrogation", "nécessité", "négation", "conditionnel"] , [r" évid", r" abrog", r" nécess", r" n(e\s|')(\S+?\s){1,5}pas ", r"[a-zA-Z]+?(rais|rait|rions|riez|raient) "]):
+        P = Pattern()
+        P.name = name
+        P.pattern = pattern
+        P.selected = False
+        P.save()
+    return render(request, "loaded_success_patterns.html")
+
+def get_choice(request):
+    # if this is a POST request we need to process the form data
+    if request.method == 'POST':
+        # create a form instance and populate it with data from the request:
+        form = form_patterns(request.POST)
+        # check whether it's valid:
+        if form.is_valid():
+            # process the data in form.cleaned_data as required
+            # change the sleceted patterns in the DB
+            pattern_names = form.cleaned_data.get('choice')
+            Patterns = Pattern.objects.all()
+            for p in Patterns:
+                if p.name in pattern_names:
+                    p.selected = True
+                else:
+                    p.selected = False
+                p.save()
+
+            year = form.cleaned_data.get('year')
+
+
+            # redirect to a new URL:
+            return redirect("core:suggestions", slug = year)
+
+def home(request):
+    Form = form_patterns()
+    context = {"form" : Form}
+    print("lala")
+    return render(request, "home.html", context = context)
+
