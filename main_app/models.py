@@ -6,6 +6,10 @@ from django.utils.safestring import mark_safe
 from django.conf import settings
 import re
 
+class Pattern(models.Model):
+    name = models.CharField(max_length = 30,primary_key=True)
+    pattern = models.CharField(max_length= 30)
+    selected = models.BooleanField(default = False)
 
 class Arret(models.Model):
     identifiant = models.SlugField(primary_key=True)
@@ -20,10 +24,10 @@ class Arret(models.Model):
 
     #TODO
     def highlights(self):
+        patterns = Pattern.objects.filter(selected = True)
         text = self.contenu
-        patterns = [r" évid\S+", r" abrog\S+", r" nécess\S+", r" n(e\s|')(\S+?\s){1,5}pas ", r"[a-zA-Z]+?(rais|rait|rions|riez|raient) "]
-        for pattern in patterns:
-          p = re.compile(pattern)
+        for p in patterns:
+          p = re.compile(p.pattern)
           count = 0
           for m in p.finditer(text):
             start, end = m.span()
