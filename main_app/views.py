@@ -4,6 +4,7 @@ import os
 import pandas as pd
 from .models import Arret
 from django.db.models import Q
+from django.views.generic import ListView
 
 # Create your views here.
 
@@ -45,11 +46,19 @@ def load_in_db(request,slug):
 
     return render(request, "loaded_success.html")
 
-def suggestions_view(request,slug):
-    context = {
-        "datas":Arret.objects.filter(Q(contenu__regex = r" évid") | Q(contenu__regex = r" abrog")| Q(contenu__regex = r" nécess"), annee=slug)
-    }
-    return render(request, "suggestions_table.html",context=context)
+#def suggestions_view(request,slug):
+#    context = {
+#        "datas":Arret.objects.filter(Q(contenu__regex = r" évid") | Q(contenu__regex = r" abrog")| Q(contenu__regex = r" nécess"), annee=slug)
+#    }
+#    return render(request, "suggestions_table.html",context=context)
+
+class suggestions_view(ListView):
+    template_name = "suggestions_table.html"
+    paginate_by = 50
+
+    def get_queryset(self):
+        qs = Arret.objects.filter(annee=self.kwargs["slug"])
+        return qs
 
 
 def select_arret(request,annee,slug):
