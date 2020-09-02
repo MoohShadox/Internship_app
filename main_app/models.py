@@ -4,8 +4,8 @@ from django.db import models
 from django.urls import reverse
 
 from django.conf import settings
-
-
+from django.utils.safestring import mark_safe
+import re
 
 class Arret(models.Model):
     identifiant = models.SlugField(primary_key=True)
@@ -17,13 +17,24 @@ class Arret(models.Model):
     image = models.URLField()
     annee = models.IntegerField()
     num_receuil = models.IntegerField()
-
     def get_selection_url(self):
         return reverse("")
 
     def select(self):
         self.selected = not self.selected
-
+    def highlights(self,):
+        text = self.contenu
+        patterns = [r" évid", r" abrog", r" nécess", r" n(e\s|')(\S+?\s){1,5}pas ", r"[a-zA-Z]+?(rais|rait|rions|riez|raient) "]
+        for pattern in patterns:
+          p = re.compile(pattern)
+          count = 0
+          for m in p.finditer(text):
+            start, end = m.span()
+            start += count*7
+            end += count*7
+            text = text[:start]+ "<b>" + text[start:end ] + "</b>" + text[end : ] 
+            count += 1
+        return mark_safe(text)
 
 
 #class Receuil(models.Model):
