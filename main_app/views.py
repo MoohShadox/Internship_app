@@ -3,6 +3,8 @@ from django.conf import settings
 import os
 import pandas as pd
 from .models import Arret
+from django.db.models import Q
+
 # Create your views here.
 
 
@@ -45,7 +47,7 @@ def load_in_db(request,slug):
 
 def suggestions_view(request,slug):
     context = {
-        "datas":Arret.objects.filter(annee=slug)
+        "datas":Arret.objects.filter(Q(contenu__regex = r" évid") | Q(contenu__regex = r" abrog")| Q(contenu__regex = r" nécess"), annee=slug)
     }
     return render(request, "suggestions_table.html",context=context)
 

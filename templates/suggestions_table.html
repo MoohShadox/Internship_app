@@ -20,7 +20,7 @@
             <td>{{ arret_obj.page }}</td>
             <td>{{ arret_obj.juridiction }}</td>
             <td>{{ arret_obj.date }}</td>
-            <td>{{ arret_obj.contenu }}</td>
+            <td>{{ arret_obj.highlights }}</td>
             <td>
             <a href="{% url 'core:select' arret_obj.annee arret_obj.identifiant  %}">
                 {% if not arret_obj.selected %}
