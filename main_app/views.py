@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from django.conf import settings
 import os
 import pandas as pd
-from .models import Arret
+from .models import Arret, Pattern
 from django.db.models import Q
 from django.views.generic import ListView
 from .formulaire_home import form_patterns
@@ -64,7 +64,7 @@ class suggestions_view(ListView):
         result = Arret.objects.none()
         for p in patterns:
             result = result | Arret.objects.filter(contenu__regex=p.pattern, annee=self.kwargs["slug"])
-    return qs
+        return result
 
 
 def select_arret(request,slug):
@@ -81,12 +81,12 @@ def download_file(request):
     qs = Arret.objects.filter(selected=True)
     output_path = "output.csv"
     if(qs.exists()):
-
         D = {
             "Arret":[arret.contenu for arret in qs],
             "Date": [arret.date for arret in qs],
             "Juridiction": [arret.juridiction for arret in qs],
             "page": [arret.page for arret in qs],
+            "lien":[arret.image for arret in qs]
         }
         df = pd.DataFrame(D)
         df.to_csv(output_path)
@@ -133,6 +133,7 @@ def get_choice(request):
             return redirect("core:suggestions", slug = year)
 
 def home(request):
+    from .formulaire_home import form_patterns
     Form = form_patterns()
     context = {"form" : Form}
     print("lala")

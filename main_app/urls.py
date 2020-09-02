@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import base,suggestions_view, load_in_db,clear , select_arret
+from .views import base,suggestions_view, load_in_db,clear , select_arret, home, load_patterns, download_file, get_choice
 urlpatterns = [
-    path("home", home, name="home")
+    path("home", home, name="home"),
     path("load_patterns", load_patterns, name="load_patterns"),
     path("load_from_cache/<slug>",load_in_db,name="load-from-cache"),
     path("suggestions/<slug>", suggestions_view.as_view(), name="suggestions"),
