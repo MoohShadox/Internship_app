@@ -20,17 +20,27 @@
             <td>{{ arret_obj.page }}</td>
             <td>{{ arret_obj.juridiction }}</td>
             <td>{{ arret_obj.date }}</td>
-            <td>{{ arret_obj.highlights }}</td>
+            <td>{{ arret_obj.contenu }}</td>
             <td>
+            <a href="{% url 'core:select' arret_obj.annee arret_obj.identifiant  %}">
                 {% if not arret_obj.selected %}
-                <button class="btn btn-primary waves-effect">
-                    Select
-                </button>
+                    <button class="btn btn-primary waves-effect">
+                        Select
+                    </button>
                 {% else %}
                     <button class="btn btn-danger waves-effect">
                         Selected
                     </button>
                 {% endif %}
+            </a>
+
+            </td>
+            <td>
+                <a  target="_blank" href={{ arret_obj.image }}>
+                    <button class="btn btn-warning waves-effect">
+                        View
+                    </button>
+                </a>
             </td>
         </tr>
       {% endfor %}

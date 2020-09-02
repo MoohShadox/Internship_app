@@ -50,9 +50,10 @@ def suggestions_view(request,slug):
     return render(request, "suggestions_table.html",context=context)
 
 
-def select_arret(request,slug):
+def select_arret(request,annee,slug):
     article_qs = Arret.objects.filter(identifiant=slug)
     if(article_qs.exists()):
         article = article_qs[0]
         article.selected = not article.selected
-    return redirect("main:suggestions")
+        article.save()
+    return redirect("core:suggestions",slug=annee)
