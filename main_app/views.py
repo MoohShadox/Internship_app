@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.conf import settings
 import os
@@ -67,12 +68,13 @@ class suggestions_view(ListView):
         return result
 
 
-def select_arret(request,annee,slug):
+def select_arret(request,slug):
     article_qs = Arret.objects.filter(identifiant=slug)
     if(article_qs.exists()):
         article = article_qs[0]
         article.selected = not article.selected
         article.save()
+<<<<<<< HEAD
     return redirect("core:suggestions",slug=annee)
 def load_patterns(request):
     for name, pattern in zip(["évidence", "abrogation", "nécessité", "négation", "conditionnel"] , [r" évid", r" abrog", r" nécess", r" n(e\s|')(\S+?\s){1,5}pas ", r"[a-zA-Z]+?(rais|rait|rions|riez|raient) "]):
@@ -113,3 +115,6 @@ def home(request):
     print("lala")
     return render(request, "home.html", context = context)
 
+=======
+    return HttpResponse(status=204)
+>>>>>>> 856eb2514148be348e4102364f8440879402c423
