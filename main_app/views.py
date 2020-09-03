@@ -81,14 +81,8 @@ def download_file(request):
     qs = Arret.objects.filter(selected=True)
     output_path = "output.csv"
     if(qs.exists()):
-        D = {
-            "Arret":[arret.contenu for arret in qs],
-            "Date": [arret.date for arret in qs],
-            "Juridiction": [arret.juridiction for arret in qs],
-            "page": [arret.page for arret in qs],
-            "lien":[arret.image for arret in qs]
-        }
-        df = pd.DataFrame(D)
+        df = pd.DataFrame.from_records( qs.values_list("contenu", "date", "juridiction", 'page', 'image'))   
+        df = df.rename(columns={0: "Arrêt", 1: "Date", 2: "Juridiction", 3:"Page", 4: "Lien"}, errors="raise")    
         df.to_csv(output_path)
         fl = open(output_path, "r")
         mime_type, _ = mimetypes.guess_type(output_path)
