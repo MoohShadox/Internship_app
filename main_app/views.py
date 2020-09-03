@@ -1,3 +1,4 @@
+from django import forms
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.conf import settings
@@ -57,8 +58,7 @@ def load_in_db(request,slug):
 
 class suggestions_view(ListView):
     template_name = "suggestions_table.html"
-    paginate_by = 50
-
+    paginate_by = 10
     def get_queryset(self):
         patterns = Pattern.objects.filter(selected=True)
         result = Arret.objects.none()
@@ -135,6 +135,9 @@ def get_choice(request):
 def home(request):
     from .formulaire_home import form_patterns
     Form = form_patterns()
+
+    Form.choices = [(p.name,p.name) for  p in Pattern.objects.all()]
+    Form.choice = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
+                                             choices=Form.choices)
     context = {"form" : Form}
-    print("lala")
     return render(request, "home.html", context = context)

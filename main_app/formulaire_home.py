@@ -1,14 +1,10 @@
 from django import forms
 from .models import Pattern
 class form_patterns(forms.Form):
-    year = forms.CharField(label='Année', max_length=100)
-    choices = [(p.name,p.name) for  p in Pattern.objects.all()]
-    choice = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
-                                         choices=choices)
 
-    def get_choice(self):
+
+    def __init__(self, *args, **kwargs):
+        super(form_patterns, self).__init__(*args, **kwargs)
+        self.fields["year"] = forms.CharField(label='Année', max_length=100)
         choices = [(p.name, p.name) for p in Pattern.objects.all()]
-        choice = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,choices=choices)
-        self.choice = choice
-        return self.choice
-
+        self.fields["choice"] = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, choices=choices)
