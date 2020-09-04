@@ -38,7 +38,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "main_app",
+    "crispy_forms",
 ]
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -133,3 +137,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 CACHE_ROOT = os.path.join(BASE_DIR, 'cache')
 SITE_ID = 1
 LOGIN_REDIRECT_URL = "/"
+
+YEAR_SELECTED = "1830"

@@ -8,7 +8,7 @@ from django.urls import path,include
 from internship_law_extr import settings
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls, name='admin'),
     path("", include(("main_app.urls","main_app"), namespace='core')),
 ]
 

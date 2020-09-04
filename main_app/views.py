@@ -20,7 +20,27 @@ def clear(request):
     Arret.objects.all().delete()
     return render(request,"base.html")
 
+def load_all(request):
+    file_list = os.listdir(settings.CACHE_ROOT)
+    for file in file_list:
+        print("Année en cours : ",file)
+        L = os.listdir(settings.CACHE_ROOT + "/" + file)
+        for id, csv_file in enumerate(L):
+            df = pd.read_csv(settings.CACHE_ROOT + "/" + file + "/" + csv_file, sep=";", index_col=0)
+            for arret, annee, juridiction, page, identifiant, image in zip(df["arrêt"], df["date"], df["juridiction"],
+                                                                           df["page"], df.index, df["lien"]):
+                A = Arret()
+                A.date = annee
+                A.annee = file
+                A.num_receuil = id
+                A.page = page
+                A.contenu = arret
+                A.juridiction = juridiction
+                A.image = image
+                A.identifiant = identifiant
+                A.save()
 
+    return render(request, "loaded_success.html")
 
 def load_in_db(request,slug):
     L = os.listdir(settings.CACHE_ROOT + "/" + slug)
@@ -59,12 +79,25 @@ def load_in_db(request,slug):
 class suggestions_view(ListView):
     template_name = "suggestions_table.html"
     paginate_by = 10
+
     def get_queryset(self):
         patterns = Pattern.objects.filter(selected=True)
         result = Arret.objects.none()
-        for p in patterns:
-            result = result | Arret.objects.filter(contenu__regex=p.pattern, annee=self.kwargs["slug"])
+        if(self.kwargs["selected"]=="True"):
+            for p in patterns:
+                result = result | Arret.objects.filter(contenu__regex=p.pattern, annee=self.kwargs["slug"])
+        else:
+            for p in patterns:
+                result = result | Arret.objects.filter(contenu__regex=p.pattern, annee=self.kwargs["slug"],selected=False)
         return result
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['display_selected'] = self.kwargs["selected"] == "True"
+        context["year"] = self.kwargs["slug"]
+        return context
+
+
 
 
 def select_arret(request,slug):
@@ -121,10 +154,16 @@ def get_choice(request):
                 p.save()
 
             year = form.cleaned_data.get('year')
-
+            settings.YEAR_SELECTED = form.cleaned_data.get('year')
 
             # redirect to a new URL:
-            return redirect("core:suggestions", slug = year)
+            return redirect("core:suggestions", slug = year,selected = True)
+
+
+def previous_suggestion(request):
+    return redirect("core:suggestions", slug=settings.YEAR_SELECTED, selected=True)
+
+
 
 def home(request):
     from .formulaire_home import form_patterns

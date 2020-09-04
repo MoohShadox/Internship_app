@@ -7,4 +7,4 @@ class form_patterns(forms.Form):
         super(form_patterns, self).__init__(*args, **kwargs)
         self.fields["year"] = forms.CharField(label='Année', max_length=100)
         choices = [(p.name, p.name) for p in Pattern.objects.all()]
-        self.fields["choice"] = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, choices=choices)
+        self.fields["choice"] = forms.MultipleChoiceField(label="Filtres",widget=forms.CheckboxSelectMultiple, choices=choices)
