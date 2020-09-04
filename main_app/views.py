@@ -70,11 +70,7 @@ def load_in_db(request,slug):
 
     return render(request, "loaded_success.html")
 
-#def suggestions_view(request,slug):
-#    context = {
-#        "datas":Arret.objects.filter(Q(contenu__regex = r" évid") | Q(contenu__regex = r" abrog")| Q(contenu__regex = r" nécess"), annee=slug)
-#    }
-#    return render(request, "suggestions_table.html",context=context)
+
 
 class suggestions_view(ListView):
     template_name = "suggestions_table.html"
@@ -163,6 +159,18 @@ def get_choice(request):
 def previous_suggestion(request):
     return redirect("core:suggestions", slug=settings.YEAR_SELECTED, selected=True)
 
+class selected_view(ListView):
+    template_name = "selected_table.html"
+    paginate_by = 10
+
+    def get_queryset(self):
+        result = Arret.objects.filter(selected=True)
+        return result
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['display_selected'] = True
+        return context
 
 
 def home(request):
