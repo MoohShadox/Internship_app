@@ -19,7 +19,7 @@
     <br/>
     {% if display_selected %}
                 <div class="checkbox-container mt-5 mb-3">
-                    <form action="{% url "core:suggestions" year   False %}" method="get" class="form-example" >
+                    <form action="{% url "core:suggestions" borne_inf borne_sup combinaison  False %}" method="get" class="form-example" >
                         <label class="checkbox-label">
                             <input onChange="this.form.submit()" type="checkbox" checked>
                             <span class="checkbox-custom rectangular"></span>
@@ -29,7 +29,7 @@
 
     {% else %}
                 <div class="checkbox-container mt-5 mb-3">
-                    <form action="{% url "core:suggestions" year   True %}" method="get" class="form-example" >
+                    <form action="{% url "core:suggestions" 1800 year  True %}" method="get" class="form-example" >
                         <label class="checkbox-label">
                             <input onChange="this.form.submit()" type="checkbox" >
                             <span class="checkbox-custom rectangular"></span>

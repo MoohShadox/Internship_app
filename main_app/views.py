@@ -79,18 +79,33 @@ class suggestions_view(ListView):
     def get_queryset(self):
         patterns = Pattern.objects.filter(selected=True)
         result = Arret.objects.none()
-        if(self.kwargs["selected"]=="True"):
-            for p in patterns:
-                result = result | Arret.objects.filter(contenu__regex=p.pattern, annee=self.kwargs["slug"])
+        if(self.kwargs["combinaison"] == "Conjonction"):
+            if(self.kwargs["selected"]=="True"):
+                for p in patterns:
+                    result = result | Arret.objects.filter(contenu__regex=p.pattern, annee__gte=self.kwargs["borne_inf"], annee__lte=self.kwargs["borne_sup"])
+            else:
+                for p in patterns:
+                    result = result | Arret.objects.filter(contenu__regex=p.pattern, annee__gte=self.kwargs["borne_inf"], annee__lte=self.kwargs["borne_sup"],selected=False)
         else:
-            for p in patterns:
-                result = result | Arret.objects.filter(contenu__regex=p.pattern, annee=self.kwargs["slug"],selected=False)
+            if (self.kwargs["selected"] == "True"):
+                for p in patterns:
+                    result = result & Arret.objects.filter(contenu__regex=p.pattern,
+                                                           annee__gte=self.kwargs["borne_inf"],
+                                                           annee__lte=self.kwargs["borne_sup"])
+            else:
+                for p in patterns:
+                    result = result & Arret.objects.filter(contenu__regex=p.pattern,
+                                                           annee__gte=self.kwargs["borne_inf"],
+                                                           annee__lte=self.kwargs["borne_sup"], selected=False)
         return result
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['display_selected'] = self.kwargs["selected"] == "True"
-        context["year"] = self.kwargs["slug"]
+        context["borne_inf"] = self.kwargs["borne_inf"]
+        context["borne_sup"] = self.kwargs["borne_sup"]
+        context["combinaison"] = self.kwargs["combinaison"]
+
         return context
 
 
@@ -136,10 +151,7 @@ def get_choice(request):
     if request.method == 'POST':
         # create a form instance and populate it with data from the request:
         form = form_patterns(request.POST)
-        # check whether it's valid:
         if form.is_valid():
-            # process the data in form.cleaned_data as required
-            # change the sleceted patterns in the DB
             pattern_names = form.cleaned_data.get('choice')
             Patterns = Pattern.objects.all()
             for p in Patterns:
@@ -149,15 +161,19 @@ def get_choice(request):
                     p.selected = False
                 p.save()
 
-            year = form.cleaned_data.get('year')
-            settings.YEAR_SELECTED = form.cleaned_data.get('year')
+            year_inf = form.cleaned_data.get('year_b')[0]
+            year_sup = form.cleaned_data.get('year_e')[0]
+
+            settings.YEAR_INF = form.cleaned_data.get('year_b')[0]
+            settings.YEAR_SUP = form.cleaned_data.get('year_e')[0]
+            settings.DEFAULT_COMBINAISON = form.cleaned_data.get('conjonction')
 
             # redirect to a new URL:
-            return redirect("core:suggestions", slug = year,selected = True)
+            return redirect("core:suggestions", borne_inf=year_inf , borne_sup = year_sup,combinaison=form.cleaned_data.get('conjonction'),selected = True)
 
 
 def previous_suggestion(request):
-    return redirect("core:suggestions", slug=settings.YEAR_SELECTED, selected=True)
+    return redirect("core:suggestions", borne_inf=settings.YEAR_INF , borne_sup = settings.YEAR_SUP,combinaison=settings.DEFAULT_COMBINAISON, selected=True)
 
 class selected_view(ListView):
     template_name = "selected_table.html"
