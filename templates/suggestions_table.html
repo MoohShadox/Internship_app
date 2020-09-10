@@ -29,7 +29,7 @@
 
     {% else %}
                 <div class="checkbox-container mt-5 mb-3">
-                    <form action="{% url "core:suggestions" 1800 year  True %}" method="get" class="form-example" >
+                    <form action="{% url "core:suggestions"  borne_inf borne_sup combinaison  True %}" method="get" class="form-example" >
                         <label class="checkbox-label">
                             <input onChange="this.form.submit()" type="checkbox" >
                             <span class="checkbox-custom rectangular"></span>
@@ -44,18 +44,20 @@
     <table class="table">
       <thead>
         <tr>
-            <th scope="col">Page</th>
+            <th scope="col">Année du recueil</th>
             <th scope="col">Juridiction</th>
             <th scope="col">Date</th>
+            <th scope="col">Armes juridictionnelles</th>
             <th scope="col">Contenu de l'arrêt</th>
         </tr>
       </thead>
       <tbody>
       {% for arret_obj in object_list %}
         <tr>
-            <td>{{ arret_obj.page }}</td>
+            <td>{{ arret_obj.annee }}</td>
             <td>{{ arret_obj.juridiction }}</td>
             <td>{{ arret_obj.date }}</td>
+            <td>{{ arret_obj.get_armes_juridictionnelles }}</td>
             <td>{{ arret_obj.highlights }}</td>
         <td>
             <div class="checkbox-container">

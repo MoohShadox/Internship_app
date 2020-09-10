@@ -7,8 +7,8 @@ from django.conf import settings
 import re
 
 class Pattern(models.Model):
-    name = models.CharField(max_length = 30,primary_key=True)
-    pattern = models.CharField(max_length= 30)
+    name = models.CharField(max_length = 70,primary_key=True)
+    pattern = models.CharField(max_length= 70)
     selected = models.BooleanField(default = False)
 
 class Arret(models.Model):
@@ -21,6 +21,7 @@ class Arret(models.Model):
     annee = models.IntegerField()
     num_receuil = models.IntegerField()
     selected = models.BooleanField(default=False)
+    Armes_juridictionnelles = models.TextField(default = "")
 
     #TODO
     def highlights(self):
@@ -43,13 +44,19 @@ class Arret(models.Model):
 
     def select(self):
         self.selected = not self.selected
+        if self.selected:
+            self.Armes_juridictionnelles = self.get_armes_juridictionnelles()
 
+    def get_armes_juridictionnelles(self):
+        patterns = Pattern.objects.filter(selected = True)
+        text = self.contenu
+        l = ""
+        for p in patterns:
 
+            if re.search(p.pattern, text) is not None:
+                l += "," + p.name
+        return l[1:]
 
-#class Receuil(models.Model):
-#    nom = models.CharField(max_length=150,blank=True, null=True)
-#    arrets = models.ManyToManyField(Arret)
-#
 
 
 

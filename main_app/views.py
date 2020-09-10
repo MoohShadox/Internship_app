@@ -80,23 +80,14 @@ class suggestions_view(ListView):
         patterns = Pattern.objects.filter(selected=True)
         result = Arret.objects.none()
         if(self.kwargs["combinaison"] == "Conjonction"):
-            if(self.kwargs["selected"]=="True"):
-                for p in patterns:
-                    result = result | Arret.objects.filter(contenu__regex=p.pattern, annee__gte=self.kwargs["borne_inf"], annee__lte=self.kwargs["borne_sup"])
-            else:
-                for p in patterns:
-                    result = result | Arret.objects.filter(contenu__regex=p.pattern, annee__gte=self.kwargs["borne_inf"], annee__lte=self.kwargs["borne_sup"],selected=False)
+            result = Arret.objects.filter(annee__gte=self.kwargs["borne_inf"],annee__lte=self.kwargs["borne_sup"])
+            for p in patterns:
+                result = result.filter(contenu__regex=p.pattern)
         else:
-            if (self.kwargs["selected"] == "True"):
-                for p in patterns:
-                    result = result & Arret.objects.filter(contenu__regex=p.pattern,
-                                                           annee__gte=self.kwargs["borne_inf"],
-                                                           annee__lte=self.kwargs["borne_sup"])
-            else:
-                for p in patterns:
-                    result = result & Arret.objects.filter(contenu__regex=p.pattern,
-                                                           annee__gte=self.kwargs["borne_inf"],
-                                                           annee__lte=self.kwargs["borne_sup"], selected=False)
+            for p in patterns:
+                result = result | Arret.objects.filter(contenu__regex=p.pattern, annee__gte=self.kwargs["borne_inf"], annee__lte=self.kwargs["borne_sup"])
+        if(self.kwargs["selected"]=="True"):
+        	result = result.filter(selected = False)
         return result
 
     def get_context_data(self, **kwargs):
@@ -116,6 +107,8 @@ def select_arret(request,slug):
     if(article_qs.exists()):
         article = article_qs[0]
         article.selected = not article.selected
+        if article.selected:
+            article.Armes_juridictionnelles = article.get_armes_juridictionnelles()
         article.save()
     return HttpResponse(status=204)
 
@@ -125,9 +118,9 @@ def download_file(request):
     qs = Arret.objects.filter(selected=True)
     output_path = "output.csv"
     if(qs.exists()):
-        df = pd.DataFrame.from_records( qs.values_list("contenu", "date", "juridiction", 'page', 'image'))   
-        df = df.rename(columns={0: "Arrêt", 1: "Date", 2: "Juridiction", 3:"Page", 4: "Lien"}, errors="raise")    
-        df.to_csv(output_path)
+        df = pd.DataFrame.from_records( qs.values_list("annee","Armes_juridictionnelles","contenu", "date", "juridiction", 'page', 'image'))   
+        df = df.rename(columns={0 : "Année du receuil", 1: "Armes_juridictionnelles", 2: "Arrêt", 3: "Date", 4: "Juridiction", 5:"Page", 6: "Lien"}, errors="raise")    
+        df.to_csv(output_path, encoding="utf-8", sep = ";")
         fl = open(output_path, "r")
         mime_type, _ = mimetypes.guess_type(output_path)
         response = HttpResponse(fl, content_type=mime_type)
@@ -138,7 +131,13 @@ def download_file(request):
 
 
 def load_patterns(request):
-    for name, pattern in zip(["évidence", "abrogation", "nécessité", "négation", "conditionnel"] , [r" évid", r" abrog", r" nécess", r" n(e\s|')(\S+?\s){1,5}pas ", r"[a-zA-Z]+?(rais|rait|rions|riez|raient) "]):
+    names = ["évidence", "abrogation", "nécessité", "négation", "conditionnel",
+     "législateur/loi n’a pu", "législateur/loi ne peut", " silence de la loi ", " impossible de ne pas ", " suppléer à la loi ",
+     " implicitement", " virtuellement ", "aboli" ,"jurisconsultes"]
+    patterns = [r" évid\S+", r" abrog\S+", r" nécess\S+", r" n(e\s|')(\S+?\s){1,5}pas ", r"[a-zA-Z]+?(rais|rait|rions|riez|raient) ", " (l(é|e)gislateur|loi) n'a pu ",
+     " (l(é|e)gislateur|loi) ne peut ", " silence de la loi ", " impossible de ne pas ", " suppl(é|e)er (à|a) la loi ",
+      " implicitement ", " virtuellement ", " aboli\S+", " jurisconsultes "]
+    for name, pattern in zip( names, patterns):
         P = Pattern()
         P.name = name
         P.pattern = pattern
