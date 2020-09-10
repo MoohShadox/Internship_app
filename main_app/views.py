@@ -9,6 +9,7 @@ from django.db.models import Q
 from django.views.generic import ListView
 from .formulaire_home import form_patterns
 import mimetypes
+from django.contrib import messages
 
 # Create your views here.
 
@@ -27,17 +28,19 @@ def load_all(request):
         L = os.listdir(settings.CACHE_ROOT + "/" + file)
         for id, csv_file in enumerate(L):
             df = pd.read_csv(settings.CACHE_ROOT + "/" + file + "/" + csv_file, sep=";", index_col=0)
-            for arret, annee, juridiction, page, identifiant, image in zip(df["arrêt"], df["date"], df["juridiction"],
-                                                                           df["page"], df.index, df["lien"]):
+            for i in df.index:
                 A = Arret()
-                A.date = annee
+                A.date = df["date"][i]
                 A.annee = file
                 A.num_receuil = id
-                A.page = page
-                A.contenu = arret
-                A.juridiction = juridiction
-                A.image = image
-                A.identifiant = identifiant
+                if("page" in df):
+                    A.page = df["page"][i]
+                else:
+                    A.page = 1
+                A.contenu = df["arrêt"][i]
+                A.juridiction = df["juridiction"][i]
+                A.image = df["lien"][i]
+                A.identifiant = i
                 A.save()
 
     return render(request, "loaded_success.html")
@@ -163,12 +166,21 @@ def get_choice(request):
             year_inf = form.cleaned_data.get('year_b')[0]
             year_sup = form.cleaned_data.get('year_e')[0]
 
+            if(year_sup <= year_inf):
+                messages.error(request,"Il faut que l'année de fin soit aprés l'année de début !")
+                return redirect("core:home")
+
             settings.YEAR_INF = form.cleaned_data.get('year_b')[0]
             settings.YEAR_SUP = form.cleaned_data.get('year_e')[0]
             settings.DEFAULT_COMBINAISON = form.cleaned_data.get('conjonction')
 
             # redirect to a new URL:
             return redirect("core:suggestions", borne_inf=year_inf , borne_sup = year_sup,combinaison=form.cleaned_data.get('conjonction'),selected = True)
+        else:
+            messages.error(request,"Quelque chose cloche dans le formulaire")
+            return redirect("core:home")
+
+
 
 
 def previous_suggestion(request):
