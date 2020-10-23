@@ -1,6 +1,2 @@
-Internship_app
-- [x] function to highlight patterns
-- [ ] function to select decisions
-- [ ] button to validate selection
-- [ ] process entire base 1 
-- [ ] process second base
+# Internship_app
+Django web app for the processing of the extracted court decision from https://github.com/chekirou/Text_recognition_Internship.
